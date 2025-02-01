@@ -14,9 +14,7 @@ namespace Robots
     public partial class MainForm : Form, IView
     {
         private Timer timer = new Timer();
-
         private IGame game = new NetherEarth();
-
         private Graphics graphics;
         private Brush robotBrush = Brushes.BlueViolet;
 
@@ -29,20 +27,53 @@ namespace Robots
 
         private void Timer_Tick(object sender, EventArgs e) => game.MoveRobots(this);
 
+        /// <summary>
+        /// Обновляет поле
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="robots"></param>
+        /// <param name="resolution"></param>
         public void UpdateScreen(IField field, List<Robot> robots, int resolution)
         {
+            ShowCoordinates();                                  // Отображаем координаты выбранного робота
+
+            graphics.Clear(Color.Black);                        // Очищаем поле
+
+            // Рисуем прямоугольник, окаймляющий игровое поле
+            graphics.DrawRectangle(new Pen(Brushes.White), 0, game.PaintAreaY - 1, game.PaintAreaWidth - 1, game.PaintAreaHeight + 1);
+
+            ShowField(field, resolution);                       // Отображаем поле
+
+            ShowRobots(robots.ToArray(), resolution, field);    // Отображаем роботов
+
+            // Обводим выбранного робота, если он есть.
+            if (game.SelectedRobot != null)
+                HilightRobot(game.SelectedRobot, resolution);
+
+            pictureBox1.Refresh();
+        }
+
+        /// <summary>
+        /// Отображает координаты выбранного робота
+        /// </summary>
+        private void ShowCoordinates()
+        {
+            // Отображаем координаты выделенного робота
             if (game.SelectedRobot != null)
             {
                 label1.Text = $"X = {game.SelectedRobot.X}";
                 label2.Text = $"Y = {game.SelectedRobot.Y}";
             }
+        }
 
-            graphics.Clear(Color.Black);
-
-            //Рисуем прямоугольник, окаймляющий игровое поле
-            graphics.DrawRectangle(new Pen(Brushes.White), 0, game.PaintAreaY - 1, game.PaintAreaWidth - 1, game.PaintAreaHeight + 1);
-
-            //Отображаем игровое поле
+        /// <summary>
+        /// Отображает поле
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="resolution"></param>
+        private void ShowField(IField field, int resolution)
+        {
+            // Отображаем игровое поле
             for (int y = 0; y < field.Height; y++)
             {
                 for (int x = 0; x < field.Width; x++)
@@ -55,8 +86,16 @@ namespace Robots
                         resolution);
                 }
             }
+        }
 
-            //Отображаем роботов
+        /// <summary>
+        /// Отображает роботов
+        /// </summary>
+        /// <param name="robots"></param>
+        /// <param name="resolution"></param>
+        /// <param name="field"></param>
+        private void ShowRobots(Robot[] robots, int resolution, IField field)
+        {
             foreach (Robot r in robots)
             {
                 graphics.FillRectangle(robotBrush,
@@ -79,17 +118,21 @@ namespace Robots
                     r.Width * resolution,
                     r.Height * resolution);
             }
+        }
 
-            // Обводим выбранного робота, если он есть.
-            if (game.SelectedRobot != null)
-                graphics.DrawRectangle(
+        /// <summary>
+        /// Подсвечивает робота
+        /// </summary>
+        /// <param name="robot"></param>
+        /// <param name="resolution"></param>
+        private void HilightRobot(Robot robot, int resolution)
+        {
+            graphics.DrawRectangle(
                     new Pen(Brushes.Yellow),
-                    (game.SelectedRobot.X * resolution - game.Offset) - 1,
-                    (game.SelectedRobot.Y * resolution - 1) + game.PaintAreaY,
-                    (game.SelectedRobot.Width * resolution) + 1,
-                    (game.SelectedRobot.Height * resolution) + 1);
-
-            pictureBox1.Refresh();
+                    (robot.X * resolution - game.Offset) - 1,
+                    (robot.Y * resolution - 1) + game.PaintAreaY,
+                    (robot.Width * resolution) + 1,
+                    (robot.Height * resolution) + 1);
         }
 
         private void MainForm_Shown(object sender, EventArgs e) => StartGame();
