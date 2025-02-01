@@ -1,7 +1,9 @@
 # Имитация движения роботов, как в игре Nether Earth для ZX-Spectrum
 
 Инструменты: MS Visual Studio 2019 Professional.
+
 Стек технологий: .NET 5.0, VinForm.
+
 Разработчик: Константин Махнутин.
 
 ## Описание.
